@@ -1,0 +1,15 @@
+dataset_path: data/samples/mini_corpus.txt
+artifact_dir: artifacts/vectorstores
+index_name: classroom-basic
+pipeline_type: sequential
+chunk:
+  chunk_size: 900
+  chunk_overlap: 120
+embedding:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+vector_store:
+  persist_dir: artifacts/vectorstores
+retrieval:
+  top_k: 4
+ollama:
+  model: llama3

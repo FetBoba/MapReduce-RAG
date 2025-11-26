@@ -1,0 +1,30 @@
+dataset_path: data/samples/mini_corpus.txt
+artifact_dir: artifacts/vectorstores
+index_name: classroom
+pipeline_type: sequential
+chunk:
+  chunk_size: 900
+  chunk_overlap: 120
+  separators:
+    - "\n\n"
+    - "\n"
+    - " "
+    - ""
+embedding:
+  provider: huggingface
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+  batch_size: 64
+  normalize: true
+vector_store:
+  persist_dir: artifacts/vectorstores
+  distance_metric: l2
+mapreduce:
+  num_workers: 4
+  batch_size: 256
+  ray_address: null
+retrieval:
+  top_k: 5
+ollama:
+  model: llama3
+  temperature: 0.1
+  base_url: null

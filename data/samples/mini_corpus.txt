@@ -1,0 +1,7 @@
+Ray was created by the UC Berkeley RISELab to make distributed computing easier for machine learning workloads. Modern machine learning pipelines can be decomposed into small tasks that are scheduled across a Ray cluster.
+
+Retrieval-augmented generation (RAG) combines a retriever that surfaces context with a large language model that generates answers grounded in that context. RAG systems reduce hallucinations because the model conditions on relevant knowledge rather than just its parameters.
+
+LangChain provides building blocks for RAG systems including document loaders, text splitters, vector stores, retrievers, and chains. LangChain can orchestrate local models such as those served by Ollama.
+
+Ollama lets developers run optimized LLM weights like Llama 3 or Mistral locally. When a prompt is sent to Ollama it will select the requested model, stream tokens, and report timing metrics for the generation.

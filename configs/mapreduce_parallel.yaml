@@ -1,0 +1,18 @@
+dataset_path: data/samples/mini_corpus.txt
+artifact_dir: artifacts/vectorstores
+index_name: classroom-mapreduce
+pipeline_type: mapreduce
+chunk:
+  chunk_size: 900
+  chunk_overlap: 120
+embedding:
+  model_name: sentence-transformers/all-MiniLM-L6-v2
+vector_store:
+  persist_dir: artifacts/vectorstores
+mapreduce:
+  num_workers: 4
+  batch_size: 128
+retrieval:
+  top_k: 4
+ollama:
+  model: llama3
