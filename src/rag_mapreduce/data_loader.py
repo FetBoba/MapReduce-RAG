@@ -7,9 +7,10 @@ import json
 from pathlib import Path
 from typing import Iterable, List
 
+from langchain_community.document_loaders import PyPDFLoader
 from langchain_core.documents import Document
 
-SUPPORTED_SUFFIXES = {".txt", ".md", ".json", ".csv"}
+SUPPORTED_SUFFIXES = {".txt", ".md", ".json", ".csv", ".pdf"}
 
 
 def _load_text(path: Path) -> Document:
@@ -47,6 +48,14 @@ def _load_csv(path: Path) -> List[Document]:
     return docs
 
 
+def _load_pdf(path: Path) -> List[Document]:
+    loader = PyPDFLoader(str(path))
+    documents = loader.load()
+    for doc in documents:
+        doc.metadata.setdefault("source", str(path))
+    return documents
+
+
 def _walk_files(dataset_path: Path) -> Iterable[Path]:
     if dataset_path.is_file():
         yield dataset_path
@@ -71,6 +80,8 @@ def load_documents(dataset_path: Path | str) -> List[Document]:
             documents.extend(_load_json(file_path))
         elif file_path.suffix.lower() == ".csv":
             documents.extend(_load_csv(file_path))
+        elif file_path.suffix.lower() == ".pdf":
+            documents.extend(_load_pdf(file_path))
     if not documents:
         raise ValueError(
             f"No supported documents were found under {path}. Supported suffixes: {sorted(SUPPORTED_SUFFIXES)}"

@@ -45,6 +45,7 @@ The goal is to quantify indexing speedups and query throughput as corpus sizes g
    # Parallel MapReduce RAG
    python -m rag_mapreduce.cli ingest --config configs/mapreduce_parallel.yaml
    ```
+   Point `dataset_path` at either a single file or a folder containing many `.txt`, `.md`, `.json`, `.csv`, or `.pdf` files—the loader recurses through nested directories automatically.
 
 5. **Ask a question**
    ```bash
@@ -56,7 +57,7 @@ The goal is to quantify indexing speedups and query throughput as corpus sizes g
 All pipeline knobs live in `configs/default.yaml`:
 
 - `pipeline_type`: `sequential` or `mapreduce`.
-- `dataset_path`: file or directory with `.txt`, `.md`, `.json`, or `.csv` files.
+- `dataset_path`: file or directory with `.txt`, `.md`, `.json`, `.csv`, or `.pdf` files (folders are walked recursively, so you can ingest multiple documents at once).
 - `chunk`: size/overlap/separators for the LangChain text splitter.
 - `embedding`: embedding provider + model (default: `sentence-transformers/all-MiniLM-L6-v2`).
 - `vector_store`: FAISS persistence directory and distance metric.
@@ -139,4 +140,5 @@ pytest
 - Connect to a Ray cluster on AWS/GCP by setting `mapreduce.ray_address`.
 - Swap embeddings (e.g., `text-embedding-3-small`) or add hybrid search.
 - Add latency measurements for query-time comparisons.
+- Implement custom RAG with MapReduce in retrieval stage.
 - Wire Grafana or Ray Dashboard for live instrumentation during ingestion.

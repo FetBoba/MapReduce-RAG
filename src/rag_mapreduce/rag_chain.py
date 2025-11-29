@@ -43,7 +43,7 @@ class SimpleRAGChain:
 
     def invoke(self, payload: Any):
         question = self._question(payload)
-        documents = self.retriever.get_relevant_documents(question)
+        documents = self.retriever.invoke(question)
         formatted = self.prompt.format(
             context=self._format_docs(documents), question=question
         )
