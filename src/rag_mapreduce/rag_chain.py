@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from typing import Any, Optional
+from time import perf_counter
+from typing import Any, Dict, Optional, Tuple
 
 try:
     from langchain.chains import RetrievalQA
@@ -50,20 +51,51 @@ class SimpleRAGChain:
         answer = self.llm.invoke(formatted)
         return {"result": answer, "source_documents": documents}
 
+    def run_with_metrics(self, payload: Any) -> Tuple[Dict[str, Any], Dict[str, float]]:
+        """Invoke the chain while measuring retrieval and generation timings."""
 
-def build_rag_chain(
+        question = self._question(payload)
+        timings: Dict[str, float] = {}
+
+        retrieval_start = perf_counter()
+        documents = self.retriever.invoke(question)
+        timings["retrieval_seconds"] = perf_counter() - retrieval_start
+
+        formatted = self.prompt.format(
+            context=self._format_docs(documents), question=question
+        )
+
+        generation_start = perf_counter()
+        answer = self.llm.invoke(formatted)
+        timings["generation_seconds"] = perf_counter() - generation_start
+        timings["total_seconds"] = sum(timings.values())
+
+        return {"result": answer, "source_documents": documents}, timings
+
+
+def build_simple_chain(
     llm: BaseLanguageModel,
     retriever: VectorStoreRetriever,
     prompt_template: Optional[str] = None,
 ):
     template = prompt_template or DEFAULT_TEMPLATE
     prompt = PromptTemplate.from_template(template)
+    return SimpleRAGChain(llm=llm, retriever=retriever, prompt=prompt)
+
+
+def build_rag_chain(
+    llm: BaseLanguageModel,
+    retriever: VectorStoreRetriever,
+    prompt_template: Optional[str] = None,
+):
     if RetrievalQA is not None:
         return RetrievalQA.from_chain_type(
             llm=llm,
             chain_type="stuff",
             retriever=retriever,
             return_source_documents=True,
-            chain_type_kwargs={"prompt": prompt},
+            chain_type_kwargs={
+                "prompt": PromptTemplate.from_template(prompt_template or DEFAULT_TEMPLATE)
+            },
         )
-    return SimpleRAGChain(llm=llm, retriever=retriever, prompt=prompt)
+    return build_simple_chain(llm=llm, retriever=retriever, prompt_template=prompt_template)

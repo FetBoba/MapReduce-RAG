@@ -28,10 +28,21 @@ class SequentialPipeline:
         )
 
     def build_index(self, documents: List[Document]) -> PipelineRunStats:
+        timings = {}
         start = perf_counter()
+
+        chunk_start = perf_counter()
         chunks = chunk_documents(documents, self.config.chunk)
+        timings["chunk_seconds"] = perf_counter() - chunk_start
+
+        embed_start = perf_counter()
         embedded = embed_documents(self.embedding, chunks)
+        timings["embedding_seconds"] = perf_counter() - embed_start
+
+        index_start = perf_counter()
         self.vector_manager.build_from_embedded(embedded)
+        timings["index_seconds"] = perf_counter() - index_start
+
         duration = perf_counter() - start
         stats = PipelineRunStats(
             pipeline_type="sequential",
@@ -39,6 +50,7 @@ class SequentialPipeline:
             chunks_processed=len(chunks),
             duration_seconds=duration,
             index_path=self.vector_manager.persist_path,
+            stage_timings=timings,
         )
         self.logger.info(
             "Sequential pipeline indexed %s chunks in %.2fs", len(chunks), duration
