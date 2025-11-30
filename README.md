@@ -127,13 +127,24 @@ Typer CLI → Pipeline (sequential | mapreduce) → FAISS Vector Store → LangC
 - `rag_chain.py`: constructs RetrievalQA chain with custom prompt.
 - `evaluation.py`: benchmarking helpers returning tidy data frames.
 
-## Testing
+- **Unit tests** – run `pytest` from the repo root (virtual environment activated) to execute the helpers under `tests/`.
+- **Manual RAG validation (mini corpus)** – confirms the full ingestion → retrieval loop for both pipelines using `data/samples/mini_corpus.txt`:
+   ```bash
+   # Sequential ingestion + query
+   PYTHONPATH=src python -m rag_mapreduce.cli ingest --config configs/basic_sequential.yaml
+   PYTHONPATH=src python -m rag_mapreduce.cli query "What is retrieval-augmented generation?" --config configs/basic_sequential.yaml
 
-Run unit tests (stubs included under `tests/`).
-
-```bash
-pytest
-```
+   # MapReduce ingestion + query
+   PYTHONPATH=src python -m rag_mapreduce.cli ingest --config configs/mapreduce_parallel.yaml
+   PYTHONPATH=src python -m rag_mapreduce.cli query "What is retrieval-augmented generation?" --config configs/mapreduce_parallel.yaml
+   ```
+   Both runs return the expected explanation citing the RAG paragraph in `mini_corpus.txt`, confirming FAISS persistence and retriever wiring for basic and Ray-powered pipelines alike (standard LangChain deprecation warnings may appear).
+- **Timing / measurement runs** – append `--measure` to any `ingest` or `query` command to print a Rich table with per-stage timings. For ingestion you will see chunking, embedding, and indexing seconds reported by `PipelineRunStats`; for queries you get retrieval, generation, total, and end-to-end durations (the CLI builds an instrumented SimpleRAG chain under the hood). Example:
+   ```bash
+   PYTHONPATH=src python -m rag_mapreduce.cli ingest --config configs/basic_sequential.yaml --measure
+   PYTHONPATH=src python -m rag_mapreduce.cli query "What is retrieval-augmented generation?" --config configs/basic_sequential.yaml --measure
+   ```
+   Use the same flag with `configs/mapreduce_parallel.yaml` to compare Ray vs sequential timings; the warning noise from LangChain/Ray can be ignored.
 
 ## Next Steps
 
